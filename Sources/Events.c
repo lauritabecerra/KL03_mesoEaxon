@@ -37,6 +37,21 @@ extern "C" {
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
 
+/*
+** ===================================================================
+**     Interrupt handler : ADC0_IRQHandler
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void ADC0_IRQHandler(void)
+{
+  /* Write your code here ... */
+}
+
 /* END Events */
 
 #ifdef __cplusplus
