@@ -41,16 +41,16 @@
   #include "Init_Config.h"
 #endif
 /* User includes (#include below this line is not maintained by Processor Expert) */
+#include "PE_types.h"
 
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
 int main(void)
-/*lint -restore Enable MISRA rule (6.3) checking. */
 {
-  /* Write your local variable definition here */
+  PE_low_level_init();// End of Processor Expert internal initialization.
+  bool ERROR_global = FALSE; //error global del sistema
+  //GPIOB_Init(); //inicializa el GPIO
+  GPIOB_PDOR = 0b10011000000U; // Todos los leds apagados
 
-  /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
-  PE_low_level_init();
-  /*** End of Processor Expert internal initialization.                    ***/
 
   /* Write your code here */
   /* For example: for(;;) { } */
