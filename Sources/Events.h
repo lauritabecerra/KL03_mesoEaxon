@@ -34,24 +34,11 @@
 #include "clockMan1.h"
 #include "pin_init.h"
 #include "osa1.h"
-#include "adConv1.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif 
 
-
-/*
-** ===================================================================
-**     Interrupt handler : ADC0_IRQHandler
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-void ADC0_IRQHandler(void);
 
 /* END Events */
 
