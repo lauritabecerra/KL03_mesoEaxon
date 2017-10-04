@@ -3,7 +3,7 @@
   <Header>
     <Name>KL03_mesoEaxon</Name>
     <SavedBy>Laura Becerra</SavedBy>
-    <ModificationStamp>4</ModificationStamp>
+    <ModificationStamp>5</ModificationStamp>
     <Date>2017-10-04</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -11747,7 +11747,7 @@
         <ItemSymbol>InputPin_Ch0</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
-        <Value>ACCEL_INT/J4_3</Value>
+        <Value>THER_N/J4_1</Value>
         <SharedPrphMode>false</SharedPrphMode>
       </ItemState>
       <ItemState>
