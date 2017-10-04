@@ -28,6 +28,7 @@
 //prueba
 //prueba 2
 //portatil
+//workstation
 /* Including needed modules to compile this module/procedure */
 #include "Cpu.h"
 #include "Events.h"
