@@ -3,7 +3,7 @@
   <Header>
     <Name>KL03_mesoEaxon</Name>
     <SavedBy>Laura Becerra</SavedBy>
-    <ModificationStamp>7</ModificationStamp>
+    <ModificationStamp>8</ModificationStamp>
     <Date>2017-10-04</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -11804,8 +11804,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>1</Index>
-        <Value>false</Value>
+        <Index>0</Index>
+        <Value>true</Value>
       </ItemState>
       <ItemState>
         <ItemSymbol>ClockDivider0</ItemSymbol>
@@ -11828,8 +11828,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <EnumSymbVal>kAdc16ResolutionBitOfSingleEndAs8</EnumSymbVal>
+        <Index>4</Index>
+        <EnumSymbVal>kAdc16ResolutionBitOfSingleEndAs10</EnumSymbVal>
       </ItemState>
       <ItemState>
         <ItemSymbol>ClockSource0</ItemSymbol>
@@ -11860,8 +11860,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <EnumSymbVal>kAdc16LongSampleCycleOf24</EnumSymbVal>
+        <Index>2</Index>
+        <EnumSymbVal>kAdc16LongSampleCycleOf10</EnumSymbVal>
       </ItemState>
       <ItemState>
         <ItemSymbol>HwTrigger0</ItemSymbol>
@@ -11906,8 +11906,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>true</Value>
-        <Expanded>true</Expanded>
+        <Value>false</Value>
+        <Expanded>false</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>adcHwCfg</ItemSymbol>
