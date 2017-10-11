@@ -3,7 +3,7 @@
   <Header>
     <Name>KL03_mesoEaxon</Name>
     <SavedBy>Laura Becerra</SavedBy>
-    <ModificationStamp>8</ModificationStamp>
+    <ModificationStamp>9</ModificationStamp>
     <Date>2017-10-04</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -29,7 +29,7 @@
     <UseExistingModules>true</UseExistingModules>
     <RenamePeripheries>false</RenamePeripheries>
     <Autodependency>true</Autodependency>
-    <ProjectCompNumb>22</ProjectCompNumb>
+    <ProjectCompNumb>23</ProjectCompNumb>
     <DelUnusedPreviouslyGenFiles>true</DelUnusedPreviouslyGenFiles>
     <GeneratedCodeFrozen>false</GeneratedCodeFrozen>
     <AssignInitComponentNameToPrph>true</AssignInitComponentNameToPrph>
@@ -371,8 +371,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>true</Value>
-        <Expanded>true</Expanded>
+        <Value>false</Value>
+        <Expanded>false</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>SWD_DIOPin</ItemSymbol>
@@ -392,8 +392,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>true</Value>
-        <Expanded>true</Expanded>
+        <Value>false</Value>
+        <Expanded>false</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>SWD_CLKPin</ItemSymbol>
@@ -12857,8 +12857,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>false</Value>
-        <Expanded>false</Expanded>
+        <Value>true</Value>
+        <Expanded>true</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>PinOutput0</ItemSymbol>
@@ -12918,7 +12918,7 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>true</PropertyModelIsAutomatic>
-        <Index>2</Index>
+        <Index>1</Index>
       </ItemState>
       <ItemState>
         <ItemSymbol>PullSelect0FeatureCondGroup</ItemSymbol>
@@ -12930,7 +12930,7 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>true</PropertyModelIsAutomatic>
-        <Index>1</Index>
+        <Index>0</Index>
       </ItemState>
       <ItemState>
         <ItemSymbol>SlewRateEnable0FeatureCondGroup</ItemSymbol>
@@ -12993,7 +12993,7 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>true</PropertyModelIsAutomatic>
-        <Index>1</Index>
+        <Index>0</Index>
       </ItemState>
       <ItemState>
         <ItemSymbol>Lock0FeatureCondGroup</ItemSymbol>
@@ -18649,14 +18649,14 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>false</Value>
-        <Expanded>false</Expanded>
+        <Value>true</Value>
+        <Expanded>true</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>Pin0</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
-        <Value>&lt;Automatic&gt;</Value>
+        <Value>BUTTON_SW2/J2_6</Value>
         <SharedPrphMode>false</SharedPrphMode>
       </ItemState>
       <ItemState>

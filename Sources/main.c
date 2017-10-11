@@ -164,10 +164,10 @@ int main(void)
 		  //Bit 4 ACFGT 0 Not used in this example.
 		  //Bit 3 ACREN 0 Compare range disabled.
 		  //Bit 1:0 REFSEL 00 Selects default voltage reference pin pair (External pins VREFH and VREFL).
-  ADC0_SC1A = 0b01000000; //Pag 387: ADC status and control registers 1
+  ADC0_SC1A = 0b01001001; //Pag 387: ADC status and control registers 1
 		  //Bit 7 COCO 0 Read-only flag which is set when a conversion completes.
 		  //Bit 6 AIEN 1 Conversion complete interrupt enabled.
-		  //Bit 4:0 ADCH 00000 Input channel 0 selected as ADC input channel.
+		  //Bit 4:0 ADCH 01001 Input channel ADC0_SE9 == PTB0 selected as ADC input channel.
 
   GPIOB_PDOR &= ~ (1 << 10); // Led rojo encendido
 
@@ -179,11 +179,9 @@ int main(void)
 	  }*/
 	  result_mask = ADC0_SC1A && coco_mask;
 	  if (result_mask != 0) { //Result is ready to be read
-		  //ADC_finished = TRUE; // Result is ready to be read
 		  result = ADC0_RA;//ADC16_DRV_GetConvValueRAW(ADC_INST, (uint32_t)gCurChan);
 		  result_mask = 0;
-		  //ADC_finished = FALSE;//Resets flag
-		  //ADC0_SC1A = 0b01000000U;//initiate conversion again with AIEN - interrupt enable
+		  ADC0_SC1A = 0b01001001;;//initiate conversion again with AIEN - interrupt enable
 	  }
 
 
