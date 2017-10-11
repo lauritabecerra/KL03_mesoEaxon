@@ -74,7 +74,7 @@ unsigned int result_mask = 0;
     gAdcDone = true;
 }*/
 
-/*static int32_t init_adc(uint32_t instance)
+static int32_t init_adc(uint32_t instance)
 {
     adc16_converter_config_t adcUserConfig;
     adc16_chn_config_t adcChnConfig;
@@ -97,21 +97,21 @@ unsigned int result_mask = 0;
     adcChnConfig.chnIdx = kAdc16Chn31;
 #if FSL_FEATURE_ADC16_HAS_DIFF_MODE
     adcCalibrationChnConfig.diffConvEnable = false;
-#endif // FSL_FEATURE_ADC16_HAS_DIFF_MODE /
+#endif // FSL_FEATURE_ADC16_HAS_DIFF_MODE /*/
     adcCalibrationChnConfig.convCompletedIntEnable = false;
 
     // Configure channel0
     ADC16_DRV_ConfigConvChn(instance, 0U, &adcCalibrationChnConfig);
 
     // Configure channel1, which is used in PDB trigger case
-    ADC16_DRV_ConfigConvChn(instance, 1U, &adcCalibrationChnConfig);
+    //ADC16_DRV_ConfigConvChn(instance, 1U, &adcCalibrationChnConfig);
 
     // Auto calibration.
     ADC16_DRV_GetAutoCalibrationParam(instance, &adcCalibrationParam);
     ADC16_DRV_SetCalibrationParam(instance, &adcCalibrationParam);
 #endif
 
-    // Initialization ADC for
+    /*// Initialization ADC for
     // 12bit resolution, interrrupt mode, hw trigger enabled.
     // normal convert speed, VREFH/L as reference,
     // disable continuouse convert mode.
@@ -137,10 +137,10 @@ unsigned int result_mask = 0;
     ADC16_DRV_ConfigConvChn(instance, 0U, &adcChnConfig);
 
     // Configure channel1, which is used in PDB trigger case
-    ADC16_DRV_ConfigConvChn(instance, 1U, &adcChnConfig);
+    ADC16_DRV_ConfigConvChn(instance, 1U, &adcChnConfig);*/
 
     return 0;
-}*/
+}
 
 
 int main(void)
@@ -148,9 +148,10 @@ int main(void)
   PE_low_level_init();// End of Processor Expert internal initialization.
   //bool ERROR_global = FALSE; //error global del sistema
   GPIOB_Init(); //inicializa el GPIO
+  init_adc(ADC_INST);
   GPIOB_PDOR = 0b10110000000000U; // Todos los leds apagados
 
-  //Inicializa el ADC
+  //Configures ADC
   ADC0_CFG1 = 0b10011000;//Pg. 389: ADC configuration register 1
   	  //Bit7: low power = 1
   	  //Bit6-5: ADCK input clock / 1 =00
