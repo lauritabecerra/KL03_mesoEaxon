@@ -35,6 +35,7 @@
 #include "pin_init.h"
 #include "osa1.h"
 #include "adConv1.h"
+#include "lpuartCom1.h"
 
 #ifdef __cplusplus
 extern "C" {

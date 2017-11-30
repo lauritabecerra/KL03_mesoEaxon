@@ -33,6 +33,7 @@
 #include "pin_init.h"
 #include "osa1.h"
 #include "adConv1.h"
+#include "lpuartCom1.h"
 #if CPU_INIT_CONFIG
   #include "Init_Config.h"
 #endif
@@ -40,10 +41,13 @@
 #include "PE_types.h"
 #include "fsl_adc16_driver.h"
 
+#define ERR_OK                          0x00U /*!< OK */
+volatile uint8_t Tx_start, Tx_byte1, Tx_byte2, counter, Tx_finish; //emg = [byte1,byte2]
+volatile uint8_t Tx_buffer[5];
 
 unsigned long cont = 0 ;
-//ADC variables
 
+//ADC variables
 volatile bool ADC_init_status;
 volatile bool ADC_finished;
 #define ADC_INPUT_CHAN 3 // default ADC channel for hw trigger demo (comes from adc_hw_trigger.h)
@@ -52,30 +56,14 @@ volatile bool ADC_finished;
 ///////////////////////////////////////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////////////////////////////////////
-//static volatile bool gAdcDone = false; // sync object for adc convert result
-//static volatile uint8_t gCurChan = 0;
 static uint16_t result;//static float result; //store value obtained in ADC// static uint16_t result; //store value obtained in ADC
-static float result_volts; //store obtained voltage measurement
 unsigned int coco_mask = 0b10000000U;
 unsigned int result_mask = 0;
-//SIM_Type * gSimBase[] = SIM_BASE_PTRS; // SIM base address
-//static sparse_node_ptr gChartHead[CHART_ROWS]; // sparse matrix head
-//static sparse_node_t gChartNodes[NR_SAMPLES]; // sparse matrix nodes
-//static uint32_t gFreeNode = 0; // free node slot index for gChartNodes[]
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Code
 ///////////////////////////////////////////////////////////////////////////////
-/*!
- * @brief ADC channel0 callback for fetching sample data.
- */
-/*static void adc_chn0_isr_callback(void)
-{
-    gCurChan = 0;
-    gAdcDone = true;
-}*/
-
 static int32_t init_adc(uint32_t instance)
 {
     adc16_converter_config_t adcUserConfig;
@@ -99,67 +87,41 @@ static int32_t init_adc(uint32_t instance)
     adcChnConfig.chnIdx = kAdc16Chn31;
 #if FSL_FEATURE_ADC16_HAS_DIFF_MODE
     adcCalibrationChnConfig.diffConvEnable = false;
-#endif // FSL_FEATURE_ADC16_HAS_DIFF_MODE /*/
+#endif // FSL_FEATURE_ADC16_HAS_DIFF_MODE
     adcCalibrationChnConfig.convCompletedIntEnable = false;
 
     // Configure channel0
     ADC16_DRV_ConfigConvChn(instance, 0U, &adcCalibrationChnConfig);
 
-    // Configure channel1, which is used in PDB trigger case
-    //ADC16_DRV_ConfigConvChn(instance, 1U, &adcCalibrationChnConfig);
-
     // Auto calibration.
     ADC16_DRV_GetAutoCalibrationParam(instance, &adcCalibrationParam);
     ADC16_DRV_SetCalibrationParam(instance, &adcCalibrationParam);
 #endif
-
-    /*// Initialization ADC for
-    // 12bit resolution, interrrupt mode, hw trigger enabled.
-    // normal convert speed, VREFH/L as reference,
-    // disable continuouse convert mode.
-    ADC16_DRV_StructInitUserConfigDefault(&adcUserConfig);
-    adcUserConfig.hwTriggerEnable = true;
-    adcUserConfig.continuousConvEnable = false;
-#if BOARD_ADC_USE_ALT_VREF
-    adcUserConfig.refVoltSrc = kAdc16RefVoltSrcOfValt;
-#endif
-    ADC16_DRV_Init(instance, &adcUserConfig); //Initialized the ADC module converter
-
-    // Install Callback function into ISR
-    ADC_TEST_InstallCallback(instance, 0U, adc_chn0_isr_callback);
-    //ADC_TEST_InstallCallback(instance, 1U, adc_chn1_isr_callback);
-
-    adcChnConfig.chnIdx = (adc16_chn_t)ADC_INPUT_CHAN;
-#if FSL_FEATURE_ADC16_HAS_DIFF_MODE
-    adcChnConfig.diffConvEnable = false;
-#endif // FSL_FEATURE_ADC16_HAS_DIFF_MODE /
-    adcChnConfig.convCompletedIntEnable = true;
-
-    // Configure channel0
-    ADC16_DRV_ConfigConvChn(instance, 0U, &adcChnConfig);
-
-    // Configure channel1, which is used in PDB trigger case
-    ADC16_DRV_ConfigConvChn(instance, 1U, &adcChnConfig);*/
-
     return 0;
 }
 
 
 int main(void)
 {
+
+	//From LPUART
+	int a; //for delays
+	short emg; //2 bytes, signed
+	int bit8, bit9, eq; //signed
+	uint32_t byteCountBuff = 0;
+
   PE_low_level_init();// End of Processor Expert internal initialization.
-  //bool ERROR_global = FALSE; //error global del sistema
   GPIOB_Init(); //inicializa el GPIO
   init_adc(ADC_INST);
   GPIOB_PDOR = 0b10110000000000U; // Todos los leds apagados
 
-  //Configures ADC
+  //---------Configures ADC---------------//
   ADC0_CFG1 = 0b10011000;//Pg. 389: ADC configuration register 1
-  	  //Bit7: low power = 1
-  	  //Bit6-5: ADCK input clock / 1 =00
-  	  //Bit4: long sample time = 1
-  	  //Bit3-2: single end-10 bit = 10
-  	  //Bit1-0: bus clock = 00
+		  //Bit7: low power = 1
+		  //Bit6-5: ADCK input clock / 1 =00
+		  //Bit4: long sample time = 1
+		  //Bit3-2: single end-10 bit = 10
+		  //Bit1-0: bus clock = 00
   ADC0_SC2 = 0b00000000;//Pg. 393: Status control register 2
 		  //Bit 7 ADACT 0 Flag indicates if a conversion is in progress.
 		  //Bit 6 ADTRG 0 Software trigger selected.
@@ -172,23 +134,57 @@ int main(void)
 		  //Bit 6 AIEN 1 Conversion complete interrupt enabled.
 		  //Bit 4:0 ADCH 01001 Input channel ADC0_SE9 == PTB0 selected as ADC input channel.
 
-  GPIOB_PDOR &= ~ (1 << 10); // Led rojo encendido
+  //-----------Initializes LPUART--------------------//
+    // Fill in lpuart config data
+    lpuart_user_config_t lpuartConfig = {
+        .clockSource     = kClockLpuartSrcMcgIrClk,//BOARD_LPUART_CLOCK_SOURCE,
+        .bitCountPerChar = kLpuart8BitsPerChar,
+        .parityMode      = kLpuartParityDisabled,
+        .stopBitCount    = kLpuartOneStopBit,
+        .baudRate        = 9600//BOARD_DEBUG_UART_BAUD
+    };
+    LPUART_DRV_Init(lpuartCom1_IDX, &lpuartCom1_State, &lpuartConfig); // Initialize the lpuart module with instance number and config structure
+
+
+    Tx_start = 55; //marca el inicio del dato
+    Tx_finish = 88; //end of the data
+    counter=0; // sample counter
+    Tx_buffer[0] = Tx_start;
+    Tx_buffer[1] = 0; //Tx_byte1;
+    Tx_buffer[2] = 0; //Tx_byte2;
+    Tx_buffer[4] = Tx_finish;
+
+    GPIOB_PDOR &= ~ (1 << 10); // Led rojo encendido
 
   for(;;) {
 	  GPIOB_PDOR ^= 0b110000000000U; //Toggle led red, green = DataB;
-	 /* result_mask = ADC0_SC1A && coco_mask;
-	  if (result_mask != 0) {
-		  ADC_finished = TRUE; // Result is ready to be read
-	  }*/
 	  result_mask = ADC0_SC1A && coco_mask;
 	  if (result_mask != 0) { //Result is ready to be read
 		  result = ADC0_RA;//ADC16_DRV_GetConvValueRAW(ADC_INST, (uint32_t)gCurChan);   result*3/1023;
+
+		  //---Send value LPUART----//
+		  emg=result;
+		  if (emg<256){
+			  Tx_byte1 = 0-128;
+			  Tx_byte2 =emg-128;
+		  }
+		  else {
+			  bit8 = ((emg >> 8)  & 0x01);
+			  bit9 = ((emg >> 9)  & 0x01);
+			  Tx_byte1 = (bit9*2 + bit8*1)-128;
+			  eq = bit9*512 + bit8*256;
+			  Tx_byte2 = (emg - eq)-128;
+		  }
+		  //Update TX buffer
+		  Tx_buffer[1] = Tx_byte1;
+		  Tx_buffer[2] = Tx_byte2;
+		  Tx_buffer[3] = counter;
+		  LPUART_DRV_SendDataBlocking(lpuartCom1_IDX, &Tx_buffer, 5, 1000u);
+		  counter = counter+1;
+		  //--back to ADC cycle--//
 		  result_mask = 0;
 		  ADC0_SC1A = 0b01001001;;//initiate conversion again with AIEN - interrupt enable
 	  }
-
-
-
 	  //for (cont = 0; cont < 1000000; cont++)    {	    }
   }
 
