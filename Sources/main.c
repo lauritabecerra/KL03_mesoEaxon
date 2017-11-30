@@ -54,7 +54,7 @@ volatile bool ADC_finished;
 ///////////////////////////////////////////////////////////////////////////////
 //static volatile bool gAdcDone = false; // sync object for adc convert result
 //static volatile uint8_t gCurChan = 0;
-static float result; //store value obtained in ADC// static uint16_t result; //store value obtained in ADC
+static uint16_t result;//static float result; //store value obtained in ADC// static uint16_t result; //store value obtained in ADC
 static float result_volts; //store obtained voltage measurement
 unsigned int coco_mask = 0b10000000U;
 unsigned int result_mask = 0;
@@ -182,8 +182,7 @@ int main(void)
 	  }*/
 	  result_mask = ADC0_SC1A && coco_mask;
 	  if (result_mask != 0) { //Result is ready to be read
-		  result = ADC0_RA;//ADC16_DRV_GetConvValueRAW(ADC_INST, (uint32_t)gCurChan);
-		  result_volts = 2.025; //result*3/1023;
+		  result = ADC0_RA;//ADC16_DRV_GetConvValueRAW(ADC_INST, (uint32_t)gCurChan);   result*3/1023;
 		  result_mask = 0;
 		  ADC0_SC1A = 0b01001001;;//initiate conversion again with AIEN - interrupt enable
 	  }
