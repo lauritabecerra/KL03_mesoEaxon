@@ -38,31 +38,18 @@
   #include "Init_Config.h"
 #endif
 /* User includes (#include below this line is not maintained by Processor Expert) */
-#include "PE_types.h"
-#include "fsl_adc16_driver.h"
-
-#define ERR_OK                          0x00U /*!< OK */
-volatile uint8_t Tx_start, Tx_byte1, Tx_byte2, counter, Tx_finish; //emg = [byte1,byte2]
-volatile uint8_t Tx_buffer[5];
-
-unsigned long cont = 0 ;
-
-//ADC variables
-volatile bool ADC_init_status;
-volatile bool ADC_finished;
-#define ADC_INPUT_CHAN 3 // default ADC channel for hw trigger demo (comes from adc_hw_trigger.h)
+//ADC
 #define ADC_INST 0U
-
-///////////////////////////////////////////////////////////////////////////////
-// Variables
-///////////////////////////////////////////////////////////////////////////////
-static uint16_t result;//static float result; //store value obtained in ADC// static uint16_t result; //store value obtained in ADC
+static uint16_t result; //store value obtained in ADC: 2 byte unsigned
 unsigned int coco_mask = 0b10000000U;
 unsigned int result_mask = 0;
+//LPUART (signed char == 1 byte from -128 to 127)
+volatile signed char Tx_start, Tx_byte1, Tx_byte2, counter, Tx_finish;//volatile uint8_t Tx_start, Tx_byte1, Tx_byte2, counter, Tx_finish;
+volatile signed char Tx_buffer[5];
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Code
+// ADC Initialization and calibration
 ///////////////////////////////////////////////////////////////////////////////
 static int32_t init_adc(uint32_t instance)
 {
@@ -100,52 +87,36 @@ static int32_t init_adc(uint32_t instance)
     return 0;
 }
 
-
 int main(void)
 {
-
-	//From LPUART
-	int a; //for delays
-	short emg; //2 bytes, signed
+	//For LPUART
+	long emg; //4 bytes signed    short emg; //2 bytes, signed
 	int bit8, bit9, eq; //signed
-	uint32_t byteCountBuff = 0;
 
-  PE_low_level_init();// End of Processor Expert internal initialization.
-  GPIOB_Init(); //inicializa el GPIO
-  init_adc(ADC_INST);
-  GPIOB_PDOR = 0b10110000000000U; // Todos los leds apagados
+	PE_low_level_init();// End of Processor Expert internal initialization.
+	GPIOB_Init(); //inicializa el GPIO
+	init_adc(ADC_INST); //Initialize ADC
 
-  //---------Configures ADC---------------//
-  ADC0_CFG1 = 0b10011000;//Pg. 389: ADC configuration register 1
-		  //Bit7: low power = 1
-		  //Bit6-5: ADCK input clock / 1 =00
-		  //Bit4: long sample time = 1
-		  //Bit3-2: single end-10 bit = 10
-		  //Bit1-0: bus clock = 00
-  ADC0_SC2 = 0b00000000;//Pg. 393: Status control register 2
-		  //Bit 7 ADACT 0 Flag indicates if a conversion is in progress.
-		  //Bit 6 ADTRG 0 Software trigger selected.
-		  //Bit 5 ACFE 0 Compare function disabled.
-		  //Bit 4 ACFGT 0 Not used in this example.
-		  //Bit 3 ACREN 0 Compare range disabled.
-		  //Bit 1:0 REFSEL 00 Selects default voltage reference pin pair (External pins VREFH and VREFL).
-  ADC0_SC1A = 0b01001001; //Pag 387: ADC status and control registers 1
-		  //Bit 7 COCO 0 Read-only flag which is set when a conversion completes.
-		  //Bit 6 AIEN 1 Conversion complete interrupt enabled.
-		  //Bit 4:0 ADCH 01001 Input channel ADC0_SE9 == PTB0 selected as ADC input channel.
+	GPIOB_PDOR = 0b10110000000000U; // Todos los leds apagados
+	LPUART_DRV_Init(lpuartCom1_IDX, &lpuartCom1_State, &lpuartCom1_InitConfig0); // Initialize the lpuart module with instance number and config structure
 
-  //-----------Initializes LPUART--------------------//
-    // Fill in lpuart config data
-    lpuart_user_config_t lpuartConfig = {
-        .clockSource     = kClockLpuartSrcMcgIrClk,//BOARD_LPUART_CLOCK_SOURCE,
-        .bitCountPerChar = kLpuart8BitsPerChar,
-        .parityMode      = kLpuartParityDisabled,
-        .stopBitCount    = kLpuartOneStopBit,
-        .baudRate        = 9600//BOARD_DEBUG_UART_BAUD
-    };
-    LPUART_DRV_Init(lpuartCom1_IDX, &lpuartCom1_State, &lpuartConfig); // Initialize the lpuart module with instance number and config structure
+	///////////////////////////////////////////////////////////////////////////////
+	// ADC configuration
+	///////////////////////////////////////////////////////////////////////////////
+    ADC0_CFG1 = 0b10011000;//Pg. 389: ADC configuration register 1
+    		  //Bit7: low power = 1
+    		  //Bit6-5: ADCK input clock / 1 =00
+    		  //Bit4: long sample time = 1
+    		  //Bit3-2: single end-10 bit = 10
+    		  //Bit1-0: bus clock = 00
+    ADC0_SC1A = 0b00001001; //ADC0_SC1A = 0b01001001; //Pag 387: ADC status and control registers 1
+    		  //Bit 7 COCO 0 Read-only flag which is set when a conversion completes.
+    		  //Bit 6 AIEN 1 Conversion complete interrupt enabled.
+    		  //Bit 4:0 ADCH 01001 Input channel ADC0_SE9 == PTB0 selected as ADC input channel.
 
-
+    ///////////////////////////////////////////////////////////////////////////////
+    // Start LPUART variables
+    ///////////////////////////////////////////////////////////////////////////////
     Tx_start = 55; //marca el inicio del dato
     Tx_finish = 88; //end of the data
     counter=0; // sample counter
@@ -158,34 +129,33 @@ int main(void)
 
   for(;;) {
 	  GPIOB_PDOR ^= 0b110000000000U; //Toggle led red, green = DataB;
+	  //Acquire ADC data
 	  result_mask = ADC0_SC1A && coco_mask;
 	  if (result_mask != 0) { //Result is ready to be read
 		  result = ADC0_RA;//ADC16_DRV_GetConvValueRAW(ADC_INST, (uint32_t)gCurChan);   result*3/1023;
-
-		  //---Send value LPUART----//
-		  emg=result;
-		  if (emg<256){
-			  Tx_byte1 = 0-128;
-			  Tx_byte2 =emg-128;
-		  }
-		  else {
-			  bit8 = ((emg >> 8)  & 0x01);
-			  bit9 = ((emg >> 9)  & 0x01);
-			  Tx_byte1 = (bit9*2 + bit8*1)-128;
-			  eq = bit9*512 + bit8*256;
-			  Tx_byte2 = (emg - eq)-128;
-		  }
-		  //Update TX buffer
-		  Tx_buffer[1] = Tx_byte1;
-		  Tx_buffer[2] = Tx_byte2;
-		  Tx_buffer[3] = counter;
-		  LPUART_DRV_SendDataBlocking(lpuartCom1_IDX, &Tx_buffer, 5, 1000u);
-		  counter = counter+1;
-		  //--back to ADC cycle--//
 		  result_mask = 0;
-		  ADC0_SC1A = 0b01001001;;//initiate conversion again with AIEN - interrupt enable
+		ADC0_SC1A = 0b00001001;//ADC0_SC1A = 0b01001001;;//initiate conversion again with AIEN - interrupt enable
 	  }
-	  //for (cont = 0; cont < 1000000; cont++)    {	    }
+	  emg = result;
+	  //Process to cut it in two bytes (Tx_byte1 and Tx_byte2)
+	  if (emg<256){
+		  Tx_byte1 = 0-128;
+		  Tx_byte2 =emg-128;
+	  }
+	  else {
+		  bit8 = ((emg >> 8)  & 0x01);
+		  bit9 = ((emg >> 9)  & 0x01);
+		  Tx_byte1 = (bit9*2 + bit8*1)-128;
+		  eq = bit9*512 + bit8*256;
+		  Tx_byte2 = (emg - eq)-128;
+	  }
+	  //Update TX buffer
+	  Tx_buffer[1] = Tx_byte1;
+	  Tx_buffer[2] = Tx_byte2;
+	  Tx_buffer[3] = counter;
+	  //Send this data through the LPUART
+	  LPUART_DRV_SendDataBlocking(lpuartCom1_IDX, &Tx_buffer, 5, 1000u);
+	  counter = counter+1; //Update sample counter
   }
 
 
